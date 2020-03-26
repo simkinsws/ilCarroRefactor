@@ -1,6 +1,5 @@
 package ilcarro.ilcarro;
 
-import ilcarro.ilcarro.dto.searchDto.filters.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
