@@ -30,7 +30,7 @@ public class AuthenticationController {
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
 
-	@PostMapping(value = "/authenticate")
+	@PostMapping(value = "/login")
 	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest jwtRequest) throws Exception {
 
 		authenticate(jwtRequest.getUsername(), jwtRequest.getPassword());

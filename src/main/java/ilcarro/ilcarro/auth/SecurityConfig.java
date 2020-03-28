@@ -75,10 +75,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable()
 				// dont authenticate this particular request
-				.authorizeRequests().antMatchers("/authenticate").permitAll().antMatchers(HttpMethod.OPTIONS)
+				.authorizeRequests().antMatchers("/login").permitAll().antMatchers(HttpMethod.OPTIONS)
 				.permitAll().antMatchers("/swagger-ui.html").permitAll().antMatchers("/webjars/**",
 						"/swagger-resources/**", "/v2/api-docs", "/configuration/ui", "/configuration/security")
-				.permitAll().
+				.permitAll().antMatchers("/api/registration","/api/helloword").permitAll().
 				// all other requests need to be authenticated
 				anyRequest().authenticated().and().
 				// make sure we use stateless session; session won't be used to

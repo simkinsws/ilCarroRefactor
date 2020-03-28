@@ -1,6 +1,26 @@
 package ilcarro.ilcarro.controllers;
 
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
 import ilcarro.ilcarro.api.ilCarroReturnCode;
+import ilcarro.ilcarro.constant.IlCarroConstant;
 import ilcarro.ilcarro.dto.Comment;
 import ilcarro.ilcarro.dto.bookingDto.BookedPeriodDto;
 import ilcarro.ilcarro.dto.carDto.CarRequestDto;
@@ -11,123 +31,138 @@ import ilcarro.ilcarro.dto.reservationDto.ReservationRequestDto;
 import ilcarro.ilcarro.dto.reservationDto.ReservationResponseDto;
 import ilcarro.ilcarro.dto.userDto.UserRequestDto;
 import ilcarro.ilcarro.dto.userDto.UserResponseDto;
-import ilcarro.ilcarro.entities.UserMongo;
+import ilcarro.ilcarro.entities.ResponseModel;
 import ilcarro.ilcarro.service.ilCarroService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/api")
 public class ilCarroController {
 
-    @Autowired
-    private ilCarroService ilCarroService;
-    private String getEmail(String authHeader) {
-        if(authHeader != null) {
-            return authHeader;
-        } else {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-    }
-    @PostMapping("/registration")
-    public UserResponseDto registerUser(@RequestHeader(value = "email") String authHeader,
-            @RequestBody UserRequestDto userRequestDto) {
-        return ilCarroService.registerUser(getEmail(authHeader),userRequestDto);
-    }
+	@Autowired
+	private ilCarroService ilCarroService;
 
-    @PutMapping("/user")
-    public UserResponseDto updateUser(@RequestHeader(value = "email") String authHeader,
-                                                      @RequestBody UserRequestDto userRequestDto){
-        return ilCarroService.updateUser(getEmail(authHeader), userRequestDto);
-    }
+	private String getEmail(String authHeader) {
+		if (authHeader != null) {
+			return authHeader;
+		} else {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		}
+	}
 
-    @DeleteMapping("/user/{email}")
-    public ilCarroReturnCode deleteUser(@PathVariable("email") String email) {
-            ilCarroService.deleteUser(email);
-            return ilCarroReturnCode.OK;
-    }
+	// For my testing, if everything goes well then it should run, remove if not
+	// required.
+	@GetMapping("/helloword")
+	public String helloword() {
+		return "helloword";
+	}
 
-    @PostMapping("/car")
-    public CarResponseOwnerDto addCar(@RequestBody CarRequestDto carRequestDto,
-                                      @RequestHeader("email") String authHeader) {
-        return ilCarroService.addCar(carRequestDto, getEmail(authHeader));
-    }
+	@PostMapping("/registration")
+	public ResponseModel registerUser(@RequestBody UserRequestDto userRequestDto) {
 
-    @GetMapping("/user/cars/periods/serialNumber=")
-    public List<BookedPeriodDto> ownerGetCarBookedPeriods(@RequestHeader(value = "email") String authHeader,
-                                                          @RequestParam("serialNumber") String serialNumber) {
-        return ilCarroService.getOwnerCarBookedPeriods(getEmail(authHeader),serialNumber);
-    }
+		ResponseModel response = new ResponseModel();
+		List<Object> dataList = new ArrayList<Object>();
+		UserResponseDto userResponse = ilCarroService.registerUser(userRequestDto);
+		if (userResponse == null) {
+			response.setStatus(IlCarroConstant.CONFLICT_CODE);
+			dataList.add(userResponse);
+			response.setData(dataList);
+			return response;
+		} else {
+			response.setStatus(IlCarroConstant.SUCCESS_CODE);
+			dataList.add(userResponse);
+			response.setData(dataList);
+			return response;
+		}
 
-    @GetMapping("/user/cars/")
-        public List<CarResponseDto> getOwnerCarsByEmail(@RequestHeader("email") String authHeader){
-            return ilCarroService.getOwnerCarsById(getEmail(authHeader));
-        }
+	}
 
-    @GetMapping("/user/cars/car/serialNumber=") // owner get car by id
-    public CarResponseDto getOwnerCarById(@RequestHeader(value = "email") String authHeader ,
-                                          @RequestParam String serialNumber) {
-            return ilCarroService.getOwnerCarById(getEmail(authHeader),serialNumber);
-    }
+	@PutMapping("/user")
+	public UserResponseDto updateUser(@RequestHeader(value = "email") String authHeader,
+			@RequestBody UserRequestDto userRequestDto) {
+		return ilCarroService.updateUser(getEmail(authHeader), userRequestDto);
+	}
 
-    @PutMapping("/car/update")
-    public CarResponseOwnerDto updateCar(@RequestHeader(value = "email") String authHeader,
-                                         @RequestParam(value = "serialNumber") String serialNumber,
-                                         @RequestBody CarRequestDto carRequestDto) {
-        return ilCarroService.updateCar(getEmail(authHeader),serialNumber,carRequestDto);
-    }
+	@DeleteMapping("/user/{email}")
+	public ilCarroReturnCode deleteUser(@PathVariable("email") String email, Authentication authentication) {
+		System.out.println(authentication.getName());
+		if (email.equals(authentication.getName())) {
+			ilCarroService.deleteUser(email);
+			return ilCarroReturnCode.OK;
+		} else {
+			return ilCarroReturnCode.UNAUTHORIZED;
+		}
 
-    @GetMapping("/car/{serialNumber}")
-    public CarResponseOwnerDto getCar(@PathVariable String serialNumber) {
-        return ilCarroService.getCar(serialNumber);
-    }
+	}
 
-    @DeleteMapping("/car/delete/serialNumber=")
-    public void deleteCar(@RequestHeader(value = "email") String authHeader,
-                                       @RequestParam String serialNumber) {
-        ilCarroService.deleteCar(getEmail(authHeader),serialNumber);
-    }
+	@PostMapping("/car")
+	public CarResponseOwnerDto addCar(@RequestBody CarRequestDto carRequestDto,
+			@RequestHeader("email") String authHeader) {
+		return ilCarroService.addCar(carRequestDto, getEmail(authHeader));
+	}
 
-    @GetMapping("/comments")
-    public List<Comment> getComments() {
-        return ilCarroService.getComments();
-    }
+	@GetMapping("/user/cars/periods/serialNumber=")
+	public List<BookedPeriodDto> ownerGetCarBookedPeriods(@RequestHeader(value = "email") String authHeader,
+			@RequestParam("serialNumber") String serialNumber) {
+		return ilCarroService.getOwnerCarBookedPeriods(getEmail(authHeader), serialNumber);
+	}
 
-    @PostMapping("/comment/add")
-    public Comment addComment(
-            @RequestHeader(value = "email") String authHeader,
-            @RequestParam("serialNumber") String serialNumber,
-            @RequestBody CommentRequestDto commentRequestDto) {
-        return ilCarroService.addComment(serialNumber,getEmail(authHeader), commentRequestDto);
-    }
+	@GetMapping("/user/cars/")
+	public List<CarResponseDto> getOwnerCarsByEmail(@RequestHeader("email") String authHeader) {
+		return ilCarroService.getOwnerCarsById(getEmail(authHeader));
+	}
 
-    @PostMapping("/car/reservation/")
-    public ReservationResponseDto makeReservation(@RequestHeader(value = "email") String authHeader,
-                                                  @RequestParam("serialNumber") String serialNumber,
-                                                  @RequestBody ReservationRequestDto requestDto) {
-        return ilCarroService.makeReservation(getEmail(authHeader),serialNumber,requestDto);
+	@GetMapping("/user/cars/car/serialNumber=") // owner get car by id
+	public CarResponseDto getOwnerCarById(@RequestHeader(value = "email") String authHeader,
+			@RequestParam String serialNumber) {
+		return ilCarroService.getOwnerCarById(getEmail(authHeader), serialNumber);
+	}
 
-    }
+	@PutMapping("/car/update")
+	public CarResponseOwnerDto updateCar(@RequestHeader(value = "email") String authHeader,
+			@RequestParam(value = "serialNumber") String serialNumber, @RequestBody CarRequestDto carRequestDto) {
+		return ilCarroService.updateCar(getEmail(authHeader), serialNumber, carRequestDto);
+	}
 
-    @GetMapping("/car/best")
-    public List<UserResponseDto> getBestCars() {
-        return ilCarroService.getThreePopularCars();
-    }
+	@GetMapping("/car/{serialNumber}")
+	public CarResponseOwnerDto getCar(@PathVariable String serialNumber) {
+		return ilCarroService.getCar(serialNumber);
+	}
 
+	@DeleteMapping("/car/delete/serialNumber=")
+	public void deleteCar(@RequestHeader(value = "email") String authHeader, @RequestParam String serialNumber) {
+		ilCarroService.deleteCar(getEmail(authHeader), serialNumber);
+	}
 
-    @GetMapping("/car/comments/latest")
-    public List<Comment> getLatestComments() {
-        return ilCarroService.comments();
-    }
+	@GetMapping("/comments")
+	public List<Comment> getComments() {
+		return ilCarroService.getComments();
+	}
 
-    @GetMapping("/car/best/cars/")
-    public List<BookedPeriodDto> getBest() {
-        return ilCarroService.findBestCars();
-    }
+	@PostMapping("/comment/add")
+	public Comment addComment(@RequestHeader(value = "email") String authHeader,
+			@RequestParam("serialNumber") String serialNumber, @RequestBody CommentRequestDto commentRequestDto) {
+		return ilCarroService.addComment(serialNumber, getEmail(authHeader), commentRequestDto);
+	}
+
+	@PostMapping("/car/reservation/")
+	public ReservationResponseDto makeReservation(@RequestHeader(value = "email") String authHeader,
+			@RequestParam("serialNumber") String serialNumber, @RequestBody ReservationRequestDto requestDto) {
+		return ilCarroService.makeReservation(getEmail(authHeader), serialNumber, requestDto);
+
+	}
+
+	@GetMapping("/car/best")
+	public List<UserResponseDto> getBestCars() {
+		return ilCarroService.getThreePopularCars();
+	}
+
+	@GetMapping("/car/comments/latest")
+	public List<Comment> getLatestComments() {
+		return ilCarroService.comments();
+	}
+
+	@GetMapping("/car/best/cars/")
+	public List<BookedPeriodDto> getBest() {
+		return ilCarroService.findBestCars();
+	}
 }
