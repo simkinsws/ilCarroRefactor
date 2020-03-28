@@ -77,14 +77,14 @@ public class ilCarroController {
 	}
 
 	@PutMapping("/user")
-	public UserResponseDto updateUser(@RequestHeader(value = "email") String authHeader,
+	public UserResponseDto updateUser(Authentication authentication,
 			@RequestBody UserRequestDto userRequestDto) {
-		return ilCarroService.updateUser(getEmail(authHeader), userRequestDto);
+		return ilCarroService.updateUser(authentication.getName(), userRequestDto);
 	}
 
 	@DeleteMapping("/user/{email}")
 	public ilCarroReturnCode deleteUser(@PathVariable("email") String email, Authentication authentication) {
-		System.out.println(authentication.getName());
+//		System.out.println(authentication.getName());
 		if (email.equals(authentication.getName())) {
 			ilCarroService.deleteUser(email);
 			return ilCarroReturnCode.OK;
@@ -96,31 +96,30 @@ public class ilCarroController {
 
 	@PostMapping("/car")
 	public CarResponseOwnerDto addCar(@RequestBody CarRequestDto carRequestDto,
-			@RequestHeader("email") String authHeader) {
-		return ilCarroService.addCar(carRequestDto, getEmail(authHeader));
+									  Authentication authentication) {
+		return ilCarroService.addCar(carRequestDto, authentication.getName());
 	}
 
-	@GetMapping("/user/cars/periods/serialNumber=")
-	public List<BookedPeriodDto> ownerGetCarBookedPeriods(@RequestHeader(value = "email") String authHeader,
+	@GetMapping("/user/cars/periods")
+	public List<BookedPeriodDto> ownerGetCarBookedPeriods(Authentication authentication,
 			@RequestParam("serialNumber") String serialNumber) {
-		return ilCarroService.getOwnerCarBookedPeriods(getEmail(authHeader), serialNumber);
+		return ilCarroService.getOwnerCarBookedPeriods(authentication.getName(), serialNumber);
 	}
 
 	@GetMapping("/user/cars/")
-	public List<CarResponseDto> getOwnerCarsByEmail(@RequestHeader("email") String authHeader) {
-		return ilCarroService.getOwnerCarsById(getEmail(authHeader));
+	public List<CarResponseDto> getOwnerCarsByEmail(Authentication authentication) {
+		return ilCarroService.getOwnerCarsById(authentication.getName());
 	}
 
-	@GetMapping("/user/cars/car/serialNumber=") // owner get car by id
-	public CarResponseDto getOwnerCarById(@RequestHeader(value = "email") String authHeader,
+	@GetMapping("/user/cars/car") // owner get car by id
+	public CarResponseDto getOwnerCarById(Authentication authentication,
 			@RequestParam String serialNumber) {
-		return ilCarroService.getOwnerCarById(getEmail(authHeader), serialNumber);
+		return ilCarroService.getOwnerCarById(authentication.getName(), serialNumber);
 	}
 
 	@PutMapping("/car/update")
-	public CarResponseOwnerDto updateCar(@RequestHeader(value = "email") String authHeader,
-			@RequestParam(value = "serialNumber") String serialNumber, @RequestBody CarRequestDto carRequestDto) {
-		return ilCarroService.updateCar(getEmail(authHeader), serialNumber, carRequestDto);
+	public CarResponseOwnerDto updateCar(Authentication authentication, @RequestBody CarRequestDto carRequestDto) {
+		return ilCarroService.updateCar(authentication.getName(), carRequestDto);
 	}
 
 	@GetMapping("/car/{serialNumber}")
@@ -128,9 +127,9 @@ public class ilCarroController {
 		return ilCarroService.getCar(serialNumber);
 	}
 
-	@DeleteMapping("/car/delete/serialNumber=")
-	public void deleteCar(@RequestHeader(value = "email") String authHeader, @RequestParam String serialNumber) {
-		ilCarroService.deleteCar(getEmail(authHeader), serialNumber);
+	@DeleteMapping("/car/delete")
+	public void deleteCar(Authentication authentication, @RequestParam String serialNumber) {
+		ilCarroService.deleteCar(authentication.getName(), serialNumber);
 	}
 
 	@GetMapping("/comments")

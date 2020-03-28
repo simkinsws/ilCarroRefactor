@@ -67,7 +67,7 @@ public class ilCarroImpl implements ilCarroService {
 		UserMongo userMongo = ilCarroRepository.findById(email).orElse(null);
 
 		if (userMongo == null) {
-			throw new UserNotFoundException("User Not Found.");
+			throw new UserNotFoundException("User "+ email +" Not Found.");
 		}
 		userMongo.setFirstName(userRequestDto.getFirstName());
 		userMongo.setSecondName(userRequestDto.getSecondName());
@@ -142,12 +142,12 @@ public class ilCarroImpl implements ilCarroService {
 
 	@Override
 	@Transactional
-	public CarResponseOwnerDto updateCar(String email, String serialNumber, CarRequestDto carRequestDto) {
+	public CarResponseOwnerDto updateCar(String email, CarRequestDto carRequestDto) {
 
 		UserMongo owner = ilCarroRepository.findById(email)
 				.orElseThrow(() -> new UserNotFoundException("user not found : " + email));
-		CarMongo newCar = owner.getOwnCars().stream().filter(c -> c.getSerialNumber().equals(serialNumber)).findFirst()
-				.orElseThrow(() -> new CarNotFoundException("car with serialNumber : " + serialNumber + "not found!"));
+		CarMongo newCar = owner.getOwnCars().stream().filter(c -> c.getSerialNumber().equals(carRequestDto.getSerialNumber())).findFirst()
+				.orElseThrow(() -> new CarNotFoundException("car with serialNumber : " + carRequestDto.getSerialNumber() + "not found!"));
 
 		newCar.setMake(carRequestDto.getMake());
 		newCar.setModel(carRequestDto.getModel());

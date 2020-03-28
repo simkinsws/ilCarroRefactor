@@ -29,7 +29,7 @@ public interface ilCarroService {
 
 	List<CarResponseDto> getOwnerCarsById(String email);
 
-	CarResponseOwnerDto updateCar(String ownerEmail, String serialNumber, CarRequestDto carRequestDto);
+	CarResponseOwnerDto updateCar(String ownerEmail, CarRequestDto carRequestDto);
 
 	List<BookedPeriodDto> getOwnerCarBookedPeriods(String email, String serialNumber);
 
