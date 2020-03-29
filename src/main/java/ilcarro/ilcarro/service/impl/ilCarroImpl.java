@@ -1,9 +1,13 @@
 package ilcarro.ilcarro.service.impl;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +56,10 @@ public class ilCarroImpl implements ilCarroService {
 		if (ilCarroRepository.existsById(userRequestDto.getEmail())) {
 			return null;
 		}
+
 		UserMongo userMongo = new UserMongo(userRequestDto.getEmail(), userRequestDto.getFirstName(),
 				userRequestDto.getSecondName(), userRequestDto.getPhotoUrl(), userRequestDto.getPhone(),
-				bcryptEncode.encode(userRequestDto.getPassword()), LocalDate.now(), new ArrayList<Comment>(),
+				bcryptEncode.encode(userRequestDto.getPassword()), getCurrentDate(), new ArrayList<Comment>(),
 				new ArrayList<CarMongo>(), new ArrayList<BookedCarMongo>(), new ArrayList<BookedCarMongo>());
 		ilCarroRepository.save(userMongo);
 
@@ -67,7 +72,7 @@ public class ilCarroImpl implements ilCarroService {
 		UserMongo userMongo = ilCarroRepository.findById(email).orElse(null);
 
 		if (userMongo == null) {
-			throw new UserNotFoundException("User "+ email +" Not Found.");
+			throw new UserNotFoundException("User " + email + " Not Found.");
 		}
 		userMongo.setFirstName(userRequestDto.getFirstName());
 		userMongo.setSecondName(userRequestDto.getSecondName());
@@ -146,8 +151,10 @@ public class ilCarroImpl implements ilCarroService {
 
 		UserMongo owner = ilCarroRepository.findById(email)
 				.orElseThrow(() -> new UserNotFoundException("user not found : " + email));
-		CarMongo newCar = owner.getOwnCars().stream().filter(c -> c.getSerialNumber().equals(carRequestDto.getSerialNumber())).findFirst()
-				.orElseThrow(() -> new CarNotFoundException("car with serialNumber : " + carRequestDto.getSerialNumber() + "not found!"));
+		CarMongo newCar = owner.getOwnCars().stream()
+				.filter(c -> c.getSerialNumber().equals(carRequestDto.getSerialNumber())).findFirst()
+				.orElseThrow(() -> new CarNotFoundException(
+						"car with serialNumber : " + carRequestDto.getSerialNumber() + "not found!"));
 
 		newCar.setMake(carRequestDto.getMake());
 		newCar.setModel(carRequestDto.getModel());
@@ -431,7 +438,7 @@ public class ilCarroImpl implements ilCarroService {
 				toBookedPeriodDtoList(carMongo.getBookedPeriod()));
 	}
 
-	private CarResponseOwnerDto toCarResponseOwnerDto(String firstName, String secondName, LocalDate registrationDate,
+	private CarResponseOwnerDto toCarResponseOwnerDto(String firstName, String secondName, String registrationDate,
 			CarMongo carMongo) {
 		return new CarResponseOwnerDto(carMongo.getSerialNumber(), carMongo.getMake(), carMongo.getModel(),
 				carMongo.getYear(), carMongo.getEngine(), carMongo.getFuel(), carMongo.getGear(),
@@ -441,7 +448,7 @@ public class ilCarroImpl implements ilCarroService {
 				toOwnerDto(firstName, secondName, registrationDate), toBookedPeriodDtoList(carMongo.getBookedPeriod()));
 	}
 
-	private OwnerDto toOwnerDto(String firstName, String secondName, LocalDate registrationDate) {
+	private OwnerDto toOwnerDto(String firstName, String secondName, String registrationDate) {
 		OwnerDto ownerDto = new OwnerDto();
 		ownerDto.setFirstName(firstName);
 		ownerDto.setSecondName(secondName);
@@ -456,5 +463,12 @@ public class ilCarroImpl implements ilCarroService {
 	private boolean isSerialNumberUnique(String serialNumber) {
 		UserMongo user = ilCarroRepository.findByOwnCarsSerialNumber(serialNumber).findFirst().orElse(null);
 		return user == null;
+	}
+
+	private String getCurrentDate() {
+		DateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		timeFormat.setTimeZone(TimeZone.getTimeZone("Asia/Jerusalem"));
+		String curTime = timeFormat.format(new Date());
+		return curTime;
 	}
 }

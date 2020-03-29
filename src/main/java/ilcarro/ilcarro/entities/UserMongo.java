@@ -1,6 +1,5 @@
 package ilcarro.ilcarro.entities;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +17,14 @@ public class UserMongo {
 	private String photoUrl;
 	private String phone;
 	private String password;
-	private LocalDate registrationDate;
+	private String registrationDate;
 	private List<Comment> comments;
 	private List<CarMongo> ownCars;
 	private List<BookedCarMongo> bookedCars;
 	private List<BookedCarMongo> history;
 
 	public UserMongo(String email, String firstName, String secondName, String photoUrl, String phone, String password,
-			LocalDate registrationDate, List<Comment> comments, List<CarMongo> ownCars, List<BookedCarMongo> bookedCars,
+			String registrationDate, List<Comment> comments, List<CarMongo> ownCars, List<BookedCarMongo> bookedCars,
 			List<BookedCarMongo> history) {
 		super();
 		this.email = email;
@@ -102,11 +101,11 @@ public class UserMongo {
 		this.secondName = secondName;
 	}
 
-	public LocalDate getRegistrationDate() {
+	public String getRegistrationDate() {
 		return registrationDate;
 	}
 
-	public void setRegistrationDate(LocalDate registrationDate) {
+	public void setRegistrationDate(String registrationDate) {
 		this.registrationDate = registrationDate;
 	}
 

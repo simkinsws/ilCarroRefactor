@@ -1,6 +1,5 @@
 package ilcarro.ilcarro.dto.userDto;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import ilcarro.ilcarro.dto.Comment;
@@ -11,13 +10,13 @@ public class UserResponseDto {
 	private String firstName;
 	private String secondName;
 	private String email;
-	private LocalDate registrationDate;
+	private String registrationDate;
 	private List<Comment> comments;
 	private List<CarResponseDto> ownCars;
 	private List<BookedCarDto> bookedCars;
 	private List<BookedCarDto> history;
 
-	public UserResponseDto(String firstName, String secondName, String email, LocalDate registrationDate,
+	public UserResponseDto(String firstName, String secondName, String email, String registrationDate,
 			List<Comment> comments, List<CarResponseDto> ownCars, List<BookedCarDto> bookedCars,
 			List<BookedCarDto> history) {
 		super();
@@ -50,11 +49,11 @@ public class UserResponseDto {
 		this.secondName = secondName;
 	}
 
-	public LocalDate getRegistrationDate() {
+	public String getRegistrationDate() {
 		return registrationDate;
 	}
 
-	public void setRegistrationDate(LocalDate registrationDate) {
+	public void setRegistrationDate(String registrationDate) {
 		this.registrationDate = registrationDate;
 	}
 
