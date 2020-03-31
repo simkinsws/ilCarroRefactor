@@ -38,6 +38,7 @@ import ilcarro.ilcarro.entities.RenterBookedPeriod;
 import ilcarro.ilcarro.entities.UserMongo;
 import ilcarro.ilcarro.exceptions.errors.CarNotFoundException;
 import ilcarro.ilcarro.exceptions.errors.UserNotFoundException;
+import ilcarro.ilcarro.repository.CarResponseRepository;
 import ilcarro.ilcarro.repository.ilCarroRepository;
 import ilcarro.ilcarro.service.ilCarroService;
 
@@ -46,6 +47,10 @@ public class ilCarroImpl implements ilCarroService {
 
 	@Autowired
 	private ilCarroRepository ilCarroRepository;
+
+	@Autowired
+	private CarResponseRepository carResponseRepository;
+	
 	@Autowired
 	private PasswordEncoder bcryptEncode;
 	private static long CURRENT_ORDER_ID = 0;
@@ -381,6 +386,13 @@ public class ilCarroImpl implements ilCarroService {
 		ilCarroRepository.save(owner);
 
 		return comment;
+	}
+
+	@Override
+	public List<CarResponseOwnerDto> findByBookedPeriod(String city, String startDate, String endDate, String minAmount,
+			String maxAmount, String ascending, String itemOnPage, String currentPage) {
+		return carResponseRepository.findByBookedPeriod(city, startDate, endDate, minAmount, maxAmount, ascending, itemOnPage,
+				currentPage);
 	}
 
 	private UserResponseDto toUserDto(UserMongo userMongo) {

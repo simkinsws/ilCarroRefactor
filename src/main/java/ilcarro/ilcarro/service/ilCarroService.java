@@ -51,4 +51,7 @@ public interface ilCarroService {
 	List<Comment> comments();
 
 	List<BookedPeriodDto> findBestCars();
+
+	List<CarResponseOwnerDto> findByBookedPeriod(String city, String startDate, String endDate, String minAmount, String maxAmount,
+			String ascending, String itemOnPage, String currentPage);
 }

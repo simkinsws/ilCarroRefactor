@@ -1,6 +1,5 @@
 package ilcarro.ilcarro.controllers;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,8 +76,7 @@ public class ilCarroController {
 	}
 
 	@PutMapping("/user")
-	public UserResponseDto updateUser(Authentication authentication,
-			@RequestBody UserRequestDto userRequestDto) {
+	public UserResponseDto updateUser(Authentication authentication, @RequestBody UserRequestDto userRequestDto) {
 		return ilCarroService.updateUser(authentication.getName(), userRequestDto);
 	}
 
@@ -95,8 +93,7 @@ public class ilCarroController {
 	}
 
 	@PostMapping("/car")
-	public CarResponseOwnerDto addCar(@RequestBody CarRequestDto carRequestDto,
-									  Authentication authentication) {
+	public CarResponseOwnerDto addCar(@RequestBody CarRequestDto carRequestDto, Authentication authentication) {
 		return ilCarroService.addCar(carRequestDto, authentication.getName());
 	}
 
@@ -112,8 +109,7 @@ public class ilCarroController {
 	}
 
 	@GetMapping("/user/cars/car") // owner get car by id
-	public CarResponseDto getOwnerCarById(Authentication authentication,
-			@RequestParam String serialNumber) {
+	public CarResponseDto getOwnerCarById(Authentication authentication, @RequestParam String serialNumber) {
 		return ilCarroService.getOwnerCarById(authentication.getName(), serialNumber);
 	}
 
@@ -163,5 +159,22 @@ public class ilCarroController {
 	@GetMapping("/car/best/cars/")
 	public List<BookedPeriodDto> getBest() {
 		return ilCarroService.findBestCars();
+	}
+
+	@GetMapping(path = "/search/{city}/{startDate}/{endDate}/{minAmount}/{maxAmount}/{ascending}/{itemOnPage}/{currentPage}")
+	public ResponseModel searchCar(@PathVariable String city, @PathVariable String startDate,
+			@PathVariable String endDate, @PathVariable String minAmount, @PathVariable String maxAmount,
+			@PathVariable String ascending, @PathVariable String itemOnPage, @PathVariable String currentPage) {
+		ResponseModel response = new ResponseModel();
+		List<CarResponseOwnerDto> dataList = new ArrayList<CarResponseOwnerDto>();
+		dataList = ilCarroService.findByBookedPeriod(city, startDate, endDate, minAmount, maxAmount, ascending,
+				itemOnPage, currentPage);
+
+		for (CarResponseOwnerDto carResponseOwnerDto : dataList) {
+			System.out.println(carResponseOwnerDto.getPickUpPlace());
+		}
+		System.out.println(city + " " + startDate + " " + endDate + " " + minAmount + " " + maxAmount + " " + ascending
+				+ " " + itemOnPage + " " + currentPage);
+		return response;
 	}
 }
