@@ -4,10 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -220,26 +217,8 @@ public class ilCarroImpl implements ilCarroService {
 
 	@Override
 	public List<Comment> getComments() {
-		List<Comment> comments = ilCarroRepository.findByOrderByComments();
-		if (comments.size() == 0) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comments Not Found");
-		}
-		if (comments.size() > 6) {
-			comments = comments.subList(comments.size() - 6, comments.size());
-		}
-		for (Comment comment : comments) {
-			UserMongo userMongo = ilCarroRepository.findById("nir.simkin@gmail.com").orElse(null);
-			if (userMongo != null) {
-				if (!comment.getFirstName().equals(userMongo.getFirstName())) {
-					comment.setFirstName(userMongo.getFirstName());
-				}
-				if (!comment.getSecondName().equals(userMongo.getSecondName())) {
-					comment.setSecondName(userMongo.getSecondName());
-				}
-			}
-		}
 
-		return comments;
+		return ilCarroRepository.latestComments();
 	}
 
 	@Override
@@ -374,13 +353,38 @@ public class ilCarroImpl implements ilCarroService {
 				.orElseThrow(() -> new UserNotFoundException("user " + "with email : " + email + "not found"));
 
 		Comment comment = new Comment(renter.getFirstName(), renter.getSecondName(), renter.getPhotoUrl(),
-				LocalDate.now(), commentRequestDto.getPost());
+				getCurrentDate(), commentRequestDto.getPost());
 
 		owner.getComments().add(comment);
 		ilCarroRepository.save(renter);
 		ilCarroRepository.save(owner);
 
 		return comment;
+	}
+
+	@Override
+	public List<Comment> last3comments(String serialNumber) {
+		UserMongo ownerCar = ilCarroRepository.findByOwnCarsSerialNumber(serialNumber).findFirst()
+				.orElseThrow(() -> new CarNotFoundException("Car Not found "+ serialNumber));
+
+		return ownerCar.getComments().stream()
+				.sorted(Comparator.comparing(Comment::getPostDate).reversed())
+				.limit(3).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<CarResponseDto> searchCar(String city) {
+			return toCarResponseOwnerDtoList(ilCarroRepository.searchCar(city));
+	}
+
+	@Override
+	public void comment() {
+        ilCarroRepository.findCommentBySerialNumber();
+    }
+
+	@Override
+	public List<CarMongo> findByCity(String city) {
+		return ilCarroRepository.findCarByCity(city);
 	}
 
 	private UserResponseDto toUserDto(UserMongo userMongo) {

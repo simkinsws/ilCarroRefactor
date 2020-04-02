@@ -13,6 +13,7 @@ import ilcarro.ilcarro.dto.reservationDto.ReservationRequestDto;
 import ilcarro.ilcarro.dto.reservationDto.ReservationResponseDto;
 import ilcarro.ilcarro.dto.userDto.UserRequestDto;
 import ilcarro.ilcarro.dto.userDto.UserResponseDto;
+import ilcarro.ilcarro.entities.CarMongo;
 
 public interface ilCarroService {
 	UserResponseDto registerUser(UserRequestDto userRequestDto);
@@ -51,4 +52,12 @@ public interface ilCarroService {
 	List<Comment> comments();
 
 	List<BookedPeriodDto> findBestCars();
+
+    List<Comment> last3comments(String serialNumber);
+
+    List<CarResponseDto> searchCar(String city);
+
+    void comment();
+
+    List<CarMongo> findByCity(String city);
 }

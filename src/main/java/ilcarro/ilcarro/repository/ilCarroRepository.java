@@ -45,6 +45,9 @@ public interface ilCarroRepository extends MongoRepository<UserMongo, String>,Cu
     List<Comment> findByOrderByComments();
 
 
+    @Query(fields = "{'comments': 1, _id : 0}")
+    List<UserMongo> findByComments();
+
     List<UserMongo> findTop3ByOwnCarsOrderBySecondNameDesc();
 
     @Query(fields = "{'ownCars.bookedPeriod.orderId': 1, _id: 0}")
@@ -54,4 +57,7 @@ public interface ilCarroRepository extends MongoRepository<UserMongo, String>,Cu
     List<UserMongo> findTop3ByOrderByOwnCarsBookedPeriod();
 
     UserMongo findTopByOrderByOwnCarsBookedPeriodOrderId();
+
+    @Query("{'comments.postDate': -1}")
+    List<UserMongo> findAllByCommentsPostDateOrderByDesc();
 }

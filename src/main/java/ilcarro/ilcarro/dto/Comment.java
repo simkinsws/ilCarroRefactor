@@ -7,7 +7,7 @@ public class Comment {
     private String firstName;
     private String secondName;
     private String photoUrl;
-    private LocalDate postDate;
+    private String postDate;
     private String post;
 
     public Comment() {
@@ -16,7 +16,7 @@ public class Comment {
     public Comment(String firstName,
                    String secondName,
                    String photoUrl,
-                   LocalDate postDate,
+                   String postDate,
                    String post) {
         this.firstName = firstName;
         this.secondName = secondName;
@@ -49,11 +49,11 @@ public class Comment {
         this.photoUrl = photoUrl;
     }
 
-    public LocalDate getPostDate() {
+    public String getPostDate() {
         return postDate;
     }
 
-    public void setPostDate(LocalDate postDate) {
+    public void setPostDate(String postDate) {
         this.postDate = postDate;
     }
 

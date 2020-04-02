@@ -2,8 +2,11 @@ package ilcarro.ilcarro.controllers;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import ilcarro.ilcarro.entities.CarMongo;
+import ilcarro.ilcarro.entities.UserMongo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -132,15 +135,15 @@ public class ilCarroController {
 		ilCarroService.deleteCar(authentication.getName(), serialNumber);
 	}
 
-	@GetMapping("/comments")
-	public List<Comment> getComments() {
-		return ilCarroService.getComments();
-	}
+//	@GetMapping("/comments")
+//	public List<Comment> getComments() {
+//		return ilCarroService.getComments();
+//	}
 
 	@PostMapping("/comment/add")
-	public Comment addComment(@RequestHeader(value = "email") String authHeader,
+	public Comment addComment(Authentication authentication,
 			@RequestParam("serialNumber") String serialNumber, @RequestBody CommentRequestDto commentRequestDto) {
-		return ilCarroService.addComment(serialNumber, getEmail(authHeader), commentRequestDto);
+		return ilCarroService.addComment(serialNumber,authentication.getName(), commentRequestDto);
 	}
 
 	@PostMapping("/car/reservation/")
@@ -157,11 +160,42 @@ public class ilCarroController {
 
 	@GetMapping("/car/comments/latest")
 	public List<Comment> getLatestComments() {
-		return ilCarroService.comments();
+		System.out.println(ilCarroService.getComments());
+		return ilCarroService.getComments();
 	}
 
 	@GetMapping("/car/best/cars/")
 	public List<BookedPeriodDto> getBest() {
 		return ilCarroService.findBestCars();
+	}
+
+	@GetMapping("/car/{serialNumber}/comments")
+	public List<Comment> last3comments(@PathVariable String serialNumber) {
+		return ilCarroService.last3comments(serialNumber);
+	}
+
+	@GetMapping("/comment")
+	public void getComment() {
+		 ilCarroService.comment();
+	}
+
+	@GetMapping("/find/{city}")
+	public List<CarMongo> getComment(@PathVariable String city) {
+		return ilCarroService.findByCity(city);
+	}
+
+	@GetMapping(path = "/search/{city}")
+	public ResponseModel searchCar(@PathVariable String city) {
+		ResponseModel response = new ResponseModel();
+		List<CarResponseDto> dataList = new ArrayList<CarResponseDto>();
+		dataList = ilCarroService.searchCar(city);
+
+		for (CarResponseDto carResponseDto : dataList) {
+			System.out.println(carResponseDto.getPickUpPlace());
+			response.setData(Collections.singletonList(dataList));
+		}
+		System.out.println(city);
+		response.setData(Collections.singletonList(dataList));
+		return response;
 	}
 }
